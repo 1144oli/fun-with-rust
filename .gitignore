@@ -1,2 +1,3 @@
 /target
 **/target
+dir_to_ignore/
