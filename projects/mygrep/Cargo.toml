@@ -1,0 +1,9 @@
+[package]
+name = "mygrep"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+clap = { version = "4.0", features = ["derive"] }
+anyhow = { version = "1.0", default-features = false }
+
