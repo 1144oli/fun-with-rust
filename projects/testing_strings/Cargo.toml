@@ -1,0 +1,7 @@
+[package]
+name = "testing_strings"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+boxy-cli = "2.0.0"

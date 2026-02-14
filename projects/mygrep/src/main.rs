@@ -1,18 +1,24 @@
-use anyhow::{Context, Result};// for error handling
+use anyhow::{Context, Result};
 use clap::Parser;
-use std::io::{self,Read};
+use std::io::{self, Read};
+use std::path::PathBuf;
+use boxy_cli::prelude::*;
 
-/// Search for a pattern in a file and display the lines that contain it.
 #[derive(Parser)]
 struct Cli {
     /// The pattern to look for
     pattern: String,
+
     /// The path to the file to read
-    path: Option<std::path::PathBuf>,
+    path: Option<PathBuf>,
+
+    /// Optional output file
+    #[arg(short, long)]
+    output: Option<PathBuf>,
 }
 
 fn main() -> Result<()> {
-    let mut count:i32 = 0;
+    let mut count: i32 = 0;
     let args = Cli::parse();
 
     let content = match &args.path {
@@ -29,12 +35,38 @@ fn main() -> Result<()> {
         }
     };
 
-    //read lines
+    // Collect matches
+    let mut matches = Vec::new();
+
     for line in content.lines() {
         if line.contains(&args.pattern) {
             count += 1;
-            println!("{} - {}",count, line);
+            matches.push(format!("{} - {}", count, line));
         }
+    }
+
+    if let Some(path) = args.output {
+        std::fs::write(&path, matches.join("\n"))
+            .with_context(|| format!("could not write to `{}`", path.display()))?;
+    } 
+
+    else {
+        for line in &matches {
+            Boxy::builder()
+                .box_type(BoxType::Single)
+                .color("#00ffff")
+                .add_segment(line, "#ffffff", BoxAlign::Center)
+                .build()
+                .display();
+        }
+
+        Boxy::builder()
+            .box_type(BoxType::Single)
+            .color("#44ff00")
+            .add_segment(&format!("Total: {}", count), "#ffffff", BoxAlign::Left)
+            .external_padding(BoxPad::uniform(5))
+            .build()
+            .display();
     }
 
     Ok(())
