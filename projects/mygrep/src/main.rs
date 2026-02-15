@@ -3,6 +3,8 @@ use clap::Parser;
 use std::io::{self, Read};
 use std::path::PathBuf;
 use boxy_cli::prelude::*;
+use std::time::Instant;
+
 
 #[derive(Parser)]
 struct Cli {
@@ -18,6 +20,7 @@ struct Cli {
 }
 
 fn main() -> Result<()> {
+    let now = Instant::now();
     let mut count: i32 = 0;
     let args = Cli::parse();
 
@@ -34,7 +37,7 @@ fn main() -> Result<()> {
             buffer
         }
     };
-
+    println!("Matching to file...");
     // Collect matches
     let mut matches = Vec::new();
 
@@ -59,15 +62,17 @@ fn main() -> Result<()> {
                 .build()
                 .display();
         }
+        let elapsed = now.elapsed();
 
         Boxy::builder()
             .box_type(BoxType::Single)
             .color("#44ff00")
-            .add_segment(&format!("Total: {}", count), "#ffffff", BoxAlign::Left)
+            .add_segment(&format!("Total: {} found in {elapsed:.2?}", count), "#ffffff", BoxAlign::Left)
             .external_padding(BoxPad::uniform(5))
             .build()
             .display();
     }
+
 
     Ok(())
 }
